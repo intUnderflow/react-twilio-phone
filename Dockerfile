@@ -1,5 +1,5 @@
-FROM node:19-bullseye
+FROM node:16-bullseye
 COPY . .
 RUN npm install
 
-CMD npm run server
+CMD npm run dev
