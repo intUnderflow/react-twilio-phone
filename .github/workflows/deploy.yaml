@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: "production"
+    steps:
+      - uses: actions/checkout@v2
+      - run: envsubst < ${GITHUB_WORKSPACE}/.env.example > ${GITHUB_WORKSPACE}/.env
+        env:
+          TWILIO_ACCOUNT_SID: ${{secrets.TWILIO_ACCOUNT_SID}}
+          TWILIO_API_KEY: ${{secrets.TWILIO_API_KEY}
+          TWILIO_API_SECRET: ${{secrets.TWILIO_API_SECRET}}
+          TWILIO_TWIML_APP_SID: ${{secrets.TWILIO_TWIML_APP_SID}}
+          TWILIO_ALLOW_INCOMING_CALLS: ${{secrets.TWILIO_ALLOW_INCOMING_CALLS}}
+          FROM_NUMBER: ${{secrets.FROM_NUMBER}}
+      - run: docker login rg.nl-ams.scw.cloud/phone -u nologin --password-stdin <<< "${{secrets.SCW_SECRET_KEY}}"
+      - run: docker build . --tag=rg.nl-ams.scw.cloud/phone/app:${{ github.sha }}
+      - run: docker push rg.nl-ams.scw.cloud/phone/app:${{ github.sha }}
